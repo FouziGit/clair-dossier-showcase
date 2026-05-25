@@ -1,9 +1,27 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { copyFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+// SPA fallback: GitHub Pages serves 404.html on unknown routes — copy index.html
+// so BrowserRouter routes survive direct loads / refresh.
+function spaFallback(): Plugin {
+  return {
+    name: 'spa-fallback',
+    closeBundle() {
+      const dist = resolve(__dirname, 'dist');
+      copyFileSync(resolve(dist, 'index.html'), resolve(dist, '404.html'));
+    },
+  };
+}
+
+// Use VITE_BASE_PATH at build time (set by Pages workflow). Empty default for local dev.
+const base = process.env.VITE_BASE_PATH ?? '/';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  base,
+  plugins: [react(), tailwindcss(), spaFallback()],
   build: {
     target: 'es2022',
     sourcemap: false,
