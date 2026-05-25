@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Nav } from './Nav';
@@ -5,6 +6,13 @@ import { Footer } from './Footer';
 
 export function Layout() {
   const location = useLocation();
+
+  // Reset scroll on every route change so each page mounts at the top
+  // and the in-view animations have a chance to fire from a clean slate.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, [location.pathname]);
+
   return (
     <div className="flex min-h-dvh flex-col bg-cream-50 text-ink">
       <a className="skip-nav" href="#main">Aller au contenu principal</a>
